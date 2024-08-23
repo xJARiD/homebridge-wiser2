@@ -1,0 +1,52 @@
+{
+  "name": "homebridge-wiser2",
+  "type": "module",
+  "version": "1.1.0",
+  "description": "Wiser2 (SpaceLogic C-Bus Home Controller) plugin for homebridge: https://github.com/homebridge/homebridge",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge-wiser2",
+    "wiser2"
+  ],
+  "scripts": {
+    "build": "rimraf ./dist && tsc",
+    "lint": "eslint src/**.ts --max-warnings=0",
+    "prepublishOnly": "npm run lint && npm run build",
+    "watch": "npm run build && npm link && nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/xJARiD/homebridge-wiser2.git"
+  },
+  "homepage": "https://github.com/xJARiD/homebridge-wiser2#readme",
+  "bugs": {
+    "url": "http://github.com/xJARiD/homebridge-wiser2/issues"
+  },
+  "engines": {
+    "node": "^18.20.4 || ^20.16.0 || ^22.6.0",
+    "homebridge": "^1.8.0 || ^2.0.0-beta.0"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.4.1",
+    "node-fetch": "^3.3.2",
+    "websocket": "^1.0.35",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^22.5.0",
+    "@types/node-expat": "^2.3.5",
+    "@types/websocket": "^1.0.10",
+    "@types/xml2js": "^0.4.14",
+    "eslint": "^9.9.0",
+    "homebridge": "^2.0.0-beta.0",
+    "nodemon": "^3.1.4",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.2.0"
+  }
+}

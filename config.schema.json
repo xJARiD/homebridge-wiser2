@@ -1,0 +1,64 @@
+{
+  "pluginAlias": "homebridge-wiser2",
+  "pluginType": "platform",
+  "singular": false,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Wiser2 Name",
+        "type": "string",
+        "default": "Wiser2",
+        "required": true
+      },
+      "wiserAddress": {
+        "title": "Wiser2 url address (https:// only - NOT IP)",
+        "type": "string",
+        "required": true
+      },
+      "wiserUsername": {
+        "title": "Wiser2 username (SpaceLogic C-Bus username)",
+        "type": "string",
+        "default": "admin",
+        "required": true
+      },
+      "wiserPassword": {
+        "title": "Wiser2 password (SpaceLogic C-Bus password)",
+        "type": "string",
+        "required": true
+      },
+      "wiserPort": {
+        "title": "Wiser2 port",
+        "type": "integer",
+        "default": 443,
+        "required": true
+      },
+      "ignoredGAs": {
+        "title": "Ignored groups",
+        "type": "array",
+        "items": {
+          "title": "Group address",
+          "type": "object",
+          "properties": {
+            "network": {
+              "title": "Network",
+              "type": "integer",
+              "default": 254,
+              "maximum": 255,
+              "required": true
+            },
+            "ga": {
+              "title": "Group address",
+              "type": "integer",
+              "default": 0,
+              "maximum": 255,
+              "required": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "form": null,
+  "display": null
+}
