@@ -3,8 +3,8 @@
 import { EventEmitter } from 'events';
 import { Logging } from 'homebridge';
 import crypto from 'crypto';
-import fetch from 'node-fetch';
 import { XMLParser } from 'fast-xml-parser';
+import fetch from 'node-fetch';
 import pkg from 'websocket';
 import { AppConfig, Project } from './interface.js';
 import {
@@ -48,9 +48,6 @@ export class Wiser extends EventEmitter {
       `${this.username}:${hashedPassword}`,
       'utf8',
     ).toString('base64');
-
-    this.log.debug('hashedPassword', hashedPassword);
-    this.log.debug('wiserAuth', this.wiserAuth);
   }
 
   async start() {
@@ -71,12 +68,19 @@ export class Wiser extends EventEmitter {
             [key: string]: { [x: string]: string; command: string };
           };
 
-          const parser = new XMLParser();
-          const parsedData: ParsedDataType = parser.parse(xmlString);
-          this.log.debug(`Parsed data: ${JSON.stringify(parsedData)}`);
+          try {
+            const parser = new XMLParser({
+              ignoreAttributes: false,
+              attributeNamePrefix: '',
+            });
+            const parsedData: ParsedDataType = parser.parse(xmlString);
+            this.log.debug(`Parsed data: ${JSON.stringify(parsedData)}`);
 
-          for (const [name, attrs] of Object.entries(parsedData)) {
-            this.handleWiserData(name, attrs);
+            for (const [name, attrs] of Object.entries(parsedData)) {
+              this.handleWiserData(name, attrs);
+            }
+          } catch (error) {
+            this.log.error('Failed to parse XML', error);
           }
         }
       });
@@ -113,9 +117,14 @@ export class Wiser extends EventEmitter {
   }
 
   async connectSocket(): Promise<WebSocketConnection> {
-    return new Promise((resolve, reject) => {
-      const wsClient = new WebSocketClient();
+    const wsClient = new WebSocketClient();
 
+    // Connect with custom headers
+    wsClient.connect(this.socketURL, undefined, this.wiserURL, {
+      'sec-websocket-protocol': this.wiserAuth.replaceAll('=', ''),
+    });
+
+    return new Promise((resolve, reject) => {
       wsClient.on('connectFailed', (error) => {
         this.log.error('Connect Error: ' + error.toString());
         reject(error);
@@ -128,11 +137,6 @@ export class Wiser extends EventEmitter {
         connection.on('error', (error) => {
           this.log.error('Connection Error: ' + error.toString());
         });
-      });
-
-      // Connect with custom headers
-      wsClient.connect(this.socketURL, undefined, this.wiserURL, {
-        'sec-websocket-protocol': this.wiserAuth.replaceAll('=', ''),
       });
     });
   }
@@ -154,7 +158,6 @@ export class Wiser extends EventEmitter {
   }
 
   private parseProject(project: Project): WiserProjectGroup[] {
-    this.log.debug('project', project);
     const widgets = project.Widgets.widget;
     this.log.debug('widgets', widgets);
 
@@ -218,25 +221,39 @@ export class Wiser extends EventEmitter {
     attrs: { [x: string]: string; command: string },
   ) {
     if ('cbus_event' === name && 'cbusSetLevel' === attrs.name) {
-      const group = parseInt(attrs.group);
-      const level = parseInt(attrs.level);
-      this.log.debug(`Setting ${group} to ${level}`);
-      this.emit('groupSet', new GroupSetEvent(group, level));
+      const group = parseInt(attrs.group, 16);
+      const level = parseInt(attrs.level, 16);
+      if (this.isBlindsGroup(group)) {
+        this.handleBlinds(group, level);
+      } else {
+        this.log.debug(`Setting group ${group} to level ${level}`);
+        this.emit('groupSet', new GroupSetEvent(group, level));
+      }
     } else if ('cbus_resp' === name && 'cbusGetLevel' === attrs.command) {
-      const levels = attrs.level.split(',');
-      for (let i = 0; i < levels.length - 1; i++) {
-        const level = parseInt(levels[i]);
-        this.log.debug(`Setting level ${level} for ${i}`);
-        this.emit('groupSetScan', new GroupSetEvent(i, level));
+      const levels = attrs.level.split(',').map((lvl) => parseInt(lvl, 16));
+      for (let i = 0; i < levels.length; i++) {
+        const level = levels[i];
+        this.log.debug(`Setting level ${level} for group ${i}`);
+        if (this.isBlindsGroup(i)) {
+          this.handleBlinds(i, level);
+        } else {
+          this.emit('groupSetScan', new GroupSetEvent(i, level));
+        }
       }
     }
   }
 
-  setGroupLevel(address: AccessoryAddress, level: number, ramp = 0) {
+  isBlindsGroup(group: number): boolean {
+    return [0x26].includes(group);
+  }
+
+  handleBlinds(group: number, level: number) {
+    this.log.debug(`Setting blinds group ${group} to level ${level}`);
+    this.emit('blindsSet', new GroupSetEvent(group, level));
+  }
+
+  postSocketEvents(cmd: string) {
     const url = `${this.wiserURL}/socketEvents`;
-    // eslint-disable-next-line max-len
-    const cmd = `<cbus_cmd app="56" command="cbusSetLevel" network="${address.network}" numaddresses="1" addresses="${address.groupAddress}" levels="${level}" ramps="${ramp}"/>`;
-    this.log.debug(cmd);
     fetch(url, {
       method: 'POST',
       headers: {
@@ -247,18 +264,16 @@ export class Wiser extends EventEmitter {
     });
   }
 
+  setGroupLevel(address: AccessoryAddress, level: number, ramp = 0) {
+    // eslint-disable-next-line max-len
+    const cmd = `<cbus_cmd app="56" command="cbusSetLevel" network="${address.network}" numaddresses="1" addresses="${address.groupAddress}" levels="${level}" ramps="${ramp}"/>`;
+    this.log.debug(cmd);
+    this.postSocketEvents(cmd);
+  }
+
   private getLevels() {
-    const url = `${this.wiserURL}/socketEvents`;
     const cmd =
       '<cbus_cmd app="0x38" command="cbusGetLevel" numaddresses="256" />';
-    this.log.debug(cmd);
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${this.wiserAuth}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ cmd: cmd }),
-    });
+    this.postSocketEvents(cmd);
   }
 }

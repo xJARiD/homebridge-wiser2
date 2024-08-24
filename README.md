@@ -30,7 +30,7 @@ Add `homebridge-wiser2` to the `platforms` section of your `config.json`:
   {
     "platform": "homebridge-wiser2",
     "name": "Wiser2",
-    "wiserAddress": "https://wiser.local.dns",
+    "wiserAddress": "wiser.local.dns",
     "wiserUsername": "admin",
     "wiserPassword": "yourpassword",
     "wiserPort": "443",
@@ -51,8 +51,8 @@ Add `homebridge-wiser2` to the `platforms` section of your `config.json`:
 ### Configuration Options
 
 - `platform`: (string) The name of the platform (`homebridge-wiser2`).
-- `name`: (string) The name of the platform instance.
-- `wiserAddress`: (string) The `https://` URL of your Wiser2 controller.
+- `name`: (string) The name of the platform instance (default is `Wiser2`).
+- `wiserAddress`: (string) The URL address after `https://` for your Wiser2 controller (_do not include https://_).
 - `wiserUsername`: (string) The username for your Wiser2 controller (SpaceLogic C-Bus Home Controller).
 - `wiserPassword`: (string) The password for your Wiser2 controller (SpaceLogic C-Bus Home Controller).
 - `wiserPort`: (integer) The port number of the Wiser2 web server (default is `443`).
