@@ -39,9 +39,6 @@ export class WiserPlatform implements DynamicPlatformPlugin {
   private wiserGroups: Record<number, WiserAccessory> = {};
   private ignoredAddresses: AccessoryAddress[] = [];
 
-  private initialRetryDelay = 5000;
-  private retryDelay = this.initialRetryDelay;
-
   constructor(
     public readonly log: Logging,
     public readonly config: PlatformConfig,

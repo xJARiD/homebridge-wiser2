@@ -6,31 +6,36 @@
     "type": "object",
     "properties": {
       "name": {
-        "title": "Wiser2 Name",
+        "title": "Wiser2 name",
         "type": "string",
         "default": "Wiser2",
+        "description": "The name of the platform instance (default is `Wiser2`).",
         "required": true
       },
       "wiserAddress": {
-        "title": "Wiser2 url address (https:// only - NOT IP)",
+        "title": "Wiser2 url address",
         "type": "string",
+        "description": "The URL address after `https://` for your Wiser2 controller (_do not include https://_).",
         "required": true
       },
       "wiserUsername": {
-        "title": "Wiser2 username (SpaceLogic C-Bus username)",
+        "title": "Wiser2 username",
         "type": "string",
         "default": "admin",
+        "description": "The username for your Wiser2 controller (SpaceLogic C-Bus Home Controller).",
         "required": true
       },
       "wiserPassword": {
-        "title": "Wiser2 password (SpaceLogic C-Bus password)",
+        "title": "Wiser2 password",
         "type": "string",
+        "description": "The password for your Wiser2 controller (SpaceLogic C-Bus Home Controller).",
         "required": true
       },
       "wiserPort": {
-        "title": "Wiser2 port",
+        "title": "Wiser2 port number",
         "type": "integer",
         "default": 443,
+        "description": "The port number of the Wiser2 web server (default is `443`).",
         "required": true
       },
       "ignoredGAs": {
@@ -50,7 +55,7 @@
             "ga": {
               "title": "Group address",
               "type": "integer",
-              "default": 0,
+              "default": 254,
               "maximum": 255,
               "required": true
             }
