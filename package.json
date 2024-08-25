@@ -1,7 +1,7 @@
 {
   "name": "homebridge-wiser2",
   "type": "module",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Wiser2 (SpaceLogic C-Bus Home Controller) plugin for homebridge: https://github.com/homebridge/homebridge",
   "main": "dist/index.js",
   "license": "MIT",

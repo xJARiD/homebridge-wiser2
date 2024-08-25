@@ -1,5 +1,9 @@
 # Change log
 
+## 1.1.3
+
+- Remove a hard-coded group value
+
 ## 1.1.2
 
 - Improve UI and Readme with better form/descriptions
