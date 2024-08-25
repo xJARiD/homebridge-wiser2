@@ -223,33 +223,16 @@ export class Wiser extends EventEmitter {
     if ('cbus_event' === name && 'cbusSetLevel' === attrs.name) {
       const group = parseInt(attrs.group, 16);
       const level = parseInt(attrs.level, 16);
-      if (this.isBlindsGroup(group)) {
-        this.handleBlinds(group, level);
-      } else {
-        this.log.debug(`Setting group ${group} to level ${level}`);
-        this.emit('groupSet', new GroupSetEvent(group, level));
-      }
+      this.log.debug(`Setting group ${group} to level ${level}`);
+      this.emit('groupSet', new GroupSetEvent(group, level));
     } else if ('cbus_resp' === name && 'cbusGetLevel' === attrs.command) {
       const levels = attrs.level.split(',').map((lvl) => parseInt(lvl, 16));
       for (let i = 0; i < levels.length; i++) {
         const level = levels[i];
         this.log.debug(`Setting level ${level} for group ${i}`);
-        if (this.isBlindsGroup(i)) {
-          this.handleBlinds(i, level);
-        } else {
-          this.emit('groupSetScan', new GroupSetEvent(i, level));
-        }
+        this.emit('groupSetScan', new GroupSetEvent(i, level));
       }
     }
-  }
-
-  isBlindsGroup(group: number): boolean {
-    return [0x26].includes(group);
-  }
-
-  handleBlinds(group: number, level: number) {
-    this.log.debug(`Setting blinds group ${group} to level ${level}`);
-    this.emit('blindsSet', new GroupSetEvent(group, level));
   }
 
   postSocketEvents(cmd: string) {
